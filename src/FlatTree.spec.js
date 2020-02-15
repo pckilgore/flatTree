@@ -1,4 +1,5 @@
 import * as FlatTree from "./FlatTree";
+import shuffle from "shuffle-array";
 
 let structure = [
   { id: "ROOT", parent: undefined, children: ["A", "B", "C"] },
@@ -17,16 +18,27 @@ let structure = [
 
 let map = structure.reduce((map, node) => ({ ...map, [node.id]: node }), {});
 
-it("initialized a simple data structure with the right offsets", () => {
-  expect(FlatTree.initializeLayer(map, "ROOT")).toEqual([
-    { id: "A", parent: "ROOT", children: ["A_1", "A_2"], offset: 0 },
-    { id: "B", parent: "ROOT", children: [], offset: 1 },
-    { id: "C", parent: "ROOT", children: ["C_1", "C_2", "C_3"], offset: 2 }
-  ]);
-});
+describe("initialization", () => {
+  it("initialized a single layer with the right offsets", () => {
+    expect(FlatTree.initializeLayer(map, "ROOT")).toEqual([
+      { id: "A", parent: "ROOT", children: ["A_1", "A_2"], offset: 0 },
+      { id: "B", parent: "ROOT", children: [], offset: 1 },
+      { id: "C", parent: "ROOT", children: ["C_1", "C_2", "C_3"], offset: 2 }
+    ]);
+  });
 
-it("initializes a complex data structure with the right offsets", () => {
-  expect(FlatTree.initialize(map, "ROOT")).toEqual(
-    structure.map((node, offset) => ({ ...node, offset }))
-  );
+  it("initializes a whole tree with the right offsets", () => {
+    let shuffledAndMapped = shuffle(structure, { copy: true }).reduce(
+      (map, node) => ({ ...map, [node.id]: node }),
+      {}
+    );
+
+    expect(FlatTree.initialize(map, "ROOT")).toEqual(
+      structure.map((node, offset) => ({ ...node, offset }))
+    );
+
+    expect(FlatTree.initialize(shuffledAndMapped, "ROOT")).toEqual(
+      structure.map((node, offset) => ({ ...node, offset }))
+    );
+  });
 });
